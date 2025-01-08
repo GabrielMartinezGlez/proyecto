@@ -1,6 +1,8 @@
 package com.empresa.aplicacion
 
+import android.content.res.Configuration
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -57,6 +59,44 @@ class MainActivity : ComponentActivity() {
                         AnimalButtonsList(modifier = Modifier.padding(innerPadding))
                     }
                 }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MainActivity","onDestroy: la aplicacion se cierra por completo")
+    }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("MainActivity","onStart: la aplicación se abre")
+    }
+    override fun onPause() {
+        super.onPause()
+        Log.d("MainActivity","onPause: Aplicaion minimizada o en segundo plano")
+    }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
+            Log.d("MainActivity", "Rotación: Orientación horizontal (Landscape)")
+        }else if(newConfig.orientation==Configuration.ORIENTATION_PORTRAIT){
+            Log.d("MainActivity","Rotacion:Orientación vertical (Portrait)")
+        }
+    }
+
+    override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
+        when (level) {
+            TRIM_MEMORY_RUNNING_LOW -> {
+                Log.d("MainActivity", "onTrimMemory: Poca memoria disponible (nivel bajo).")
+            }
+            TRIM_MEMORY_RUNNING_CRITICAL -> {
+                Log.d("MainActivity", "onTrimMemory: Crítica falta de memoria.")
+            }
+            else -> {
+                // Para otros niveles de memoria, puedes agregar más registros si lo deseas
+                Log.d("MainActivity", "onTrimMemory: Nivel de memoria: $level")
             }
         }
     }
