@@ -3,17 +3,15 @@ import com.google.devtools.ksp.gradle.model.Ksp
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id("com.google.devtools.ksp") version "2.0.21-1.0.27"
-    //kotlin("kapt")
-
-
+    id("com.google.devtools.ksp") //version "2.1.0-1.0.29" // Si es necesario usar la versión de KSP explícita
+   // id("androidx.room") //version "2.6.0" apply false
 }
 
 android {
     namespace = "com.empresa.aplicacion"
     compileSdk = 34
-    ksp{
-        arg("room.schemaLocation","$projectDir/schemas")
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
     }
     defaultConfig {
         applicationId = "com.empresa.aplicacion"
@@ -47,9 +45,9 @@ android {
     buildFeatures {
         compose = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
-    }
+  //  composeOptions {
+    //    kotlinCompilerExtensionVersion = "1.5.1"
+ //   }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -58,7 +56,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -75,25 +72,23 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    val room_version="2.6.1"
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation(libs.androidx.room.runtime)   // Usamos el alias de Room de libs.versions.toml
+    implementation(libs.androidx.room.ktx)       // Usamos el alias de Room KTX
+    ksp(libs.androidx.room.compiler)             // Usamos el alias de Room Compiler para KSP
+    testImplementation(libs.androidx.room.testing) // Usamos el alias para las pruebas de Room
+
+    //Hilt
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
+
+    val room_version = "2.6.1"
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-runtime:$room_version")
-    // optional - Kotlin Extensions and Coroutines support for Room
     implementation("androidx.room:room-ktx:$room_version")
-
-    // optional - RxJava2 support for Room
     implementation("androidx.room:room-rxjava2:$room_version")
-
-    // optional - RxJava3 support for Room
     implementation("androidx.room:room-rxjava3:$room_version")
-
-    // optional - Guava support for Room, including Optional and ListenableFuture
     implementation("androidx.room:room-guava:$room_version")
-
-    // optional - Test helpers
     testImplementation("androidx.room:room-testing:$room_version")
-
-    // optional - Paging 3 Integration
     implementation("androidx.room:room-paging:$room_version")
-
 }

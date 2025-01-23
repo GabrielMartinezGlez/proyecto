@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -27,9 +28,20 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.empresa.aplicacion.ui.theme.AplicacionTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+
+
 data class AnimalEspecialidad(val nombre: String, val especialidad: String)
+
 class MainActivity : ComponentActivity() {
+
+    private val animalesViewModdel: AnimalesViewModel by viewModels {
+        AnimalesViewModelFactory(AppRepository(AppDatabase.getInstance(applicationContext).animalesDao()))
+    }
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,24 +52,44 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = {
                         TopAppBar(
-                            title={ Text("Veterinarios")}
+                            title = { Text("Veterinarios") }
                         )
                     }) { innerPadding ->
+
                     Column(
                         modifier = Modifier
                             .padding(innerPadding)
                             .verticalScroll(rememberScrollState())
-                    ){
+                    ) {
 
-                    //Greeting(
-                      //  name = "Android",
-                        //modifier = Modifier.padding(innerPadding),
-                    //)
                         ImageSection(modifier = Modifier.padding(innerPadding))
                         Content(modifier = Modifier.padding(innerPadding))
                         Spacer(modifier = Modifier.height(16.dp))
                         AnimalButtonsList(modifier = Modifier.padding(innerPadding))
+
                     }
+                }
+            }
+        }
+
+        // Aquí agregamos el código para obtener los animales desde la base de datos y mostrarlos en el Logcat
+        obtenerAnimalesDesdeBaseDeDatos()
+    }
+
+    // Función para obtener animales desde la base de datos y mostrar los datos en el Logcat
+    private fun obtenerAnimalesDesdeBaseDeDatos() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = MiBaseDeDatos(this@MainActivity)
+
+            // Obtener todos los animales desde la base de datos
+            val animales = db.obtenerAnimales()
+
+            // Verificamos si la lista está vacía
+            if (animales.isEmpty()) {
+                Log.d("MainActivity", "No hay animales registrados")
+            } else {
+                for (animal in animales) {
+                    Log.d("MainActivity", "Animal ID: ${animal.id}, Nombre: ${animal.name}, Raza: ${animal.raza}")
                 }
             }
         }
@@ -65,23 +97,25 @@ class MainActivity : ComponentActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("MainActivity","onDestroy: la aplicacion se cierra por completo")
+        Log.d("MainActivity", "onDestroy: la aplicación se cierra por completo")
     }
 
     override fun onStart() {
         super.onStart()
-        Log.d("MainActivity","onStart: la aplicación se abre")
+        Log.d("MainActivity", "onStart: la aplicación se abre")
     }
+
     override fun onPause() {
         super.onPause()
-        Log.d("MainActivity","onPause: Aplicaion minimizada o en segundo plano")
+        Log.d("MainActivity", "onPause: Aplicación minimizada o en segundo plano")
     }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        if(newConfig.orientation==Configuration.ORIENTATION_LANDSCAPE){
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             Log.d("MainActivity", "Rotación: Orientación horizontal (Landscape)")
-        }else if(newConfig.orientation==Configuration.ORIENTATION_PORTRAIT){
-            Log.d("MainActivity","Rotacion:Orientación vertical (Portrait)")
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Log.d("MainActivity", "Rotación: Orientación vertical (Portrait)")
         }
     }
 
@@ -95,12 +129,12 @@ class MainActivity : ComponentActivity() {
                 Log.d("MainActivity", "onTrimMemory: Crítica falta de memoria.")
             }
             else -> {
-                // Para otros niveles de memoria, puedes agregar más registros si lo deseas
                 Log.d("MainActivity", "onTrimMemory: Nivel de memoria: $level")
             }
         }
     }
 }
+
 @Composable
 fun ImageSection(modifier: Modifier = Modifier) {
     // Cargamos la imagen desde los recursos
@@ -116,6 +150,7 @@ fun ImageSection(modifier: Modifier = Modifier) {
             .padding(16.dp)
     )
 }
+
 @Composable
 fun AnimalButtonsList(modifier: Modifier = Modifier) {
     val animalesEspecialidades = listOf(
@@ -132,6 +167,7 @@ fun AnimalButtonsList(modifier: Modifier = Modifier) {
         }
     }
 }
+
 @Composable
 fun AnimalButton(item: AnimalEspecialidad) {
     Button(
@@ -148,25 +184,7 @@ fun AnimalButton(item: AnimalEspecialidad) {
 @Composable
 fun Content(modifier: Modifier = Modifier) {
     Text(
-        text="Elija el veterinario que le convenga",
-        modifier=modifier.padding(16.dp)
+        text = "Elija el veterinario que le convenga",
+        modifier = modifier.padding(16.dp)
     )
-}
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-@Composable
-fun MessageCard(name: String){
-    Text(text = "Hello $name!")
-}
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    AplicacionTheme {
-        Greeting("Android")
-    }
 }
