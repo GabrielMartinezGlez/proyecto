@@ -8,18 +8,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -28,20 +23,23 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.lifecycleScope
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModel
 import com.empresa.aplicacion.ui.theme.AplicacionTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-
-
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+// si falla git pull --rebase
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 data class AnimalEspecialidad(val nombre: String, val especialidad: String)
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val animalesViewModdel: AnimalesViewModel by viewModels {
-        AnimalesViewModelFactory(AppRepository(AppDatabase.getInstance(applicationContext).animalesDao()))
-    }
-
+    // Ahora inyectamos el ViewModel usando Hilt
+    private val animalesViewModel: AnimalesViewModel by viewModels()
+    private val jokeViewModel: JokeViewModel by viewModels()
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,7 +59,8 @@ class MainActivity : ComponentActivity() {
                             .padding(innerPadding)
                             .verticalScroll(rememberScrollState())
                     ) {
-
+                        ImageSection(modifier = Modifier.padding(innerPadding))
+                        JokeContent(modifier = Modifier.padding(innerPadding))
                         ImageSection(modifier = Modifier.padding(innerPadding))
                         Content(modifier = Modifier.padding(innerPadding))
                         Spacer(modifier = Modifier.height(16.dp))
@@ -72,27 +71,40 @@ class MainActivity : ComponentActivity() {
             }
         }
 
-        // Aquí agregamos el código para obtener los animales desde la base de datos y mostrarlos en el Logcat
+        // Ahora el código para obtener los animales desde la base de datos debería estar en el ViewModel
         obtenerAnimalesDesdeBaseDeDatos()
     }
+    @Composable
+    fun JokeContent(modifier: Modifier = Modifier) {
+        val joke = jokeViewModel.joke.value
 
-    // Función para obtener animales desde la base de datos y mostrar los datos en el Logcat
-    private fun obtenerAnimalesDesdeBaseDeDatos() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val db = MiBaseDeDatos(this@MainActivity)
-
-            // Obtener todos los animales desde la base de datos
-            val animales = db.obtenerAnimales()
-
-            // Verificamos si la lista está vacía
-            if (animales.isEmpty()) {
-                Log.d("MainActivity", "No hay animales registrados")
-            } else {
-                for (animal in animales) {
-                    Log.d("MainActivity", "Animal ID: ${animal.id}, Nombre: ${animal.name}, Raza: ${animal.raza}")
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(text = "Broma:", style = MaterialTheme.typography.bodyLarge)
+            Spacer(modifier = Modifier.height(8.dp))
+            if (joke != null) {
+                Text(text = joke)
+            }else{
+                Text(text="")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    jokeViewModel.fetchRandomJoke()
                 }
+            ) {
+                Text(text = "Obtener Broma")
             }
         }
+    }
+
+    private fun obtenerAnimalesDesdeBaseDeDatos() {
+        // Llamamos a la función del ViewModel
+        animalesViewModel.obtenerAnimales()
     }
 
     override fun onDestroy() {
@@ -137,16 +149,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ImageSection(modifier: Modifier = Modifier) {
-    // Cargamos la imagen desde los recursos
-    val image: Painter = painterResource(id = R.drawable.veterinario) // Reemplaza con el nombre de tu imagen
+    val image: Painter = painterResource(id = R.drawable.veterinario)
 
-    // Mostramos la imagen
     Image(
         painter = image,
         contentDescription = "Veterinario",
         modifier = modifier
             .fillMaxWidth()
-            .height(200.dp) // Ajusta el tamaño según sea necesario
+            .height(200.dp)
             .padding(16.dp)
     )
 }
@@ -160,7 +170,6 @@ fun AnimalButtonsList(modifier: Modifier = Modifier) {
         AnimalEspecialidad("Hámster", "Odontología Veterinaria")
     )
 
-    // Creamos una columna para mostrar los botones de los animales
     Column(modifier = modifier) {
         animalesEspecialidades.forEach { item ->
             AnimalButton(item)
@@ -176,7 +185,6 @@ fun AnimalButton(item: AnimalEspecialidad) {
             .padding(8.dp),
         onClick = { /* Acción que se realice cuando se haga clic */ }
     ) {
-        // Mostramos el nombre del animal y su especialidad en el botón
         Text(text = "${item.nombre} - ${item.especialidad}")
     }
 }

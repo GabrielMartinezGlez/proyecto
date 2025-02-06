@@ -4,13 +4,17 @@ import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
-
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 
-class MiBaseDeDatos (context: Context):SQLiteOpenHelper(context,"MiBaseDeDatos.db",null,1){
+class MiBaseDeDatos @Inject constructor(
+    @ApplicationContext context: Context
+) : SQLiteOpenHelper(context, "MiBaseDeDatos.db", null, 1) {
+
     override fun onCreate(db: SQLiteDatabase?) {
-        val createTableQuery ="""
+        val createTableQuery = """
             CREATE TABLE IF NOT EXISTS animales(
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT,
@@ -21,10 +25,11 @@ class MiBaseDeDatos (context: Context):SQLiteOpenHelper(context,"MiBaseDeDatos.d
     }
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {
-       db?.execSQL("DROP TABLE IF EXISTS animales")
+        db?.execSQL("DROP TABLE IF EXISTS animales")
         onCreate(db)
     }
-    fun insertarAnimales(nombre: String, raza:String): Long {
+
+    fun insertarAnimales(nombre: String, raza: String): Long {
         val db = writableDatabase
         val values = ContentValues().apply {
             put("nombre", nombre)
@@ -34,7 +39,6 @@ class MiBaseDeDatos (context: Context):SQLiteOpenHelper(context,"MiBaseDeDatos.d
         db.close()
         return id
     }
-
 
     @SuppressLint("Range")
     fun obtenerAnimales(): List<Animales> {
@@ -80,6 +84,7 @@ class MiBaseDeDatos (context: Context):SQLiteOpenHelper(context,"MiBaseDeDatos.d
         db.close()
         return filasAfectadas
     }
+
     fun eliminarAnimales(id: Long): Int {
         val db = writableDatabase
         val filasEliminadas = db.delete("animales", "id = ?", arrayOf(id.toString()))
