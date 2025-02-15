@@ -1,3 +1,4 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
 package com.empresa.aplicacion
 
 import android.content.res.Configuration
@@ -6,193 +7,106 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
-import com.empresa.aplicacion.ui.theme.AplicacionTheme
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
+
+import com.empresa.aplicacion.ui.chuckNorrisJoke.ChuckNorrisJoke
+import com.empresa.aplicacion.ui.main.MainScreen
+import com.empresa.aplicacion.ui.theme.ADOSTheme
+
 // si falla git pull --rebase
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
-data class AnimalEspecialidad(val nombre: String, val especialidad: String)
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val TAG = this.javaClass.simpleName
 
-    // Ahora inyectamos el ViewModel usando Hilt
-    private val animalesViewModel: AnimalesViewModel by viewModels()
-    private val jokeViewModel: JokeViewModel by viewModels()
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AplicacionTheme {
+            ADOSTheme {
+                val scrollState = rememberScrollState()
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        TopAppBar(
-                            title = { Text("Veterinarios") }
+                    topBar = {TopAppBar(title = { Text("ADOS") }) }) { innerPadding ->
+                    Column(modifier = Modifier.padding(innerPadding)) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ados), // Replace with your local image resource name
+                            contentDescription = "Local JPG Image",
+                            modifier = Modifier.fillMaxWidth(),
+                            contentScale = ContentScale.FillWidth
                         )
-                    }) { innerPadding ->
-
-                    Column(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        ImageSection(modifier = Modifier.padding(innerPadding))
-                        JokeContent(modifier = Modifier.padding(innerPadding))
-                        ImageSection(modifier = Modifier.padding(innerPadding))
-                        Content(modifier = Modifier.padding(innerPadding))
-                        Spacer(modifier = Modifier.height(16.dp))
-                        AnimalButtonsList(modifier = Modifier.padding(innerPadding))
-
+                        Column(
+                            modifier = Modifier.verticalScroll(scrollState)
+                        ) {
+                            MainScreen()
+                            ChuckNorrisJoke()
+                        }
                     }
                 }
             }
         }
-
-        // Ahora el código para obtener los animales desde la base de datos debería estar en el ViewModel
-        obtenerAnimalesDesdeBaseDeDatos()
-    }
-    @Composable
-    fun JokeContent(modifier: Modifier = Modifier) {
-        val joke = jokeViewModel.joke.value
-
-        Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(text = "Broma:", style = MaterialTheme.typography.bodyLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-            if (joke != null) {
-                Text(text = joke)
-            }else{
-                Text(text="")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    jokeViewModel.fetchRandomJoke()
-                }
-            ) {
-                Text(text = "Obtener Broma")
-            }
-        }
-    }
-
-    private fun obtenerAnimalesDesdeBaseDeDatos() {
-        // Llamamos a la función del ViewModel
-        animalesViewModel.obtenerAnimales()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Log.d("MainActivity", "onDestroy: la aplicación se cierra por completo")
     }
 
     override fun onStart() {
         super.onStart()
-        Log.d("MainActivity", "onStart: la aplicación se abre")
+        Log.d(TAG, "onStart: The activity is now visible to the user.")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: The activity is now in the foreground and interactive.")
     }
 
     override fun onPause() {
         super.onPause()
-        Log.d("MainActivity", "onPause: Aplicación minimizada o en segundo plano")
+        Log.d(TAG, "onPause: The activity is being paused; it is no longer in the foreground.")
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            Log.d("MainActivity", "Rotación: Orientación horizontal (Landscape)")
-        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
-            Log.d("MainActivity", "Rotación: Orientación vertical (Portrait)")
-        }
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop: The activity is no longer visible to the user.")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d(TAG, "onDestroy: The activity is being destroyed.")
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        Log.d(TAG, "onRestart: The activity is restarting after being stopped.")
     }
 
     override fun onTrimMemory(level: Int) {
         super.onTrimMemory(level)
-        when (level) {
-            TRIM_MEMORY_RUNNING_LOW -> {
-                Log.d("MainActivity", "onTrimMemory: Poca memoria disponible (nivel bajo).")
+        Log.d(TAG, "onLowMemory: The system is running low on memory. $level")
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+
+        when (newConfig.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                Log.d(TAG, "Screen Rotation: The screen is now in landscape mode.")
             }
-            TRIM_MEMORY_RUNNING_CRITICAL -> {
-                Log.d("MainActivity", "onTrimMemory: Crítica falta de memoria.")
+            Configuration.ORIENTATION_PORTRAIT -> {
+                Log.d(TAG, "Screen Rotation: The screen is now in portrait mode.")
             }
             else -> {
-                Log.d("MainActivity", "onTrimMemory: Nivel de memoria: $level")
+                Log.d(TAG, "Screen Rotation: The screen orientation has changed to an undefined mode.")
             }
         }
     }
-}
 
-@Composable
-fun ImageSection(modifier: Modifier = Modifier) {
-    val image: Painter = painterResource(id = R.drawable.veterinario)
-
-    Image(
-        painter = image,
-        contentDescription = "Veterinario",
-        modifier = modifier
-            .fillMaxWidth()
-            .height(200.dp)
-            .padding(16.dp)
-    )
-}
-
-@Composable
-fun AnimalButtonsList(modifier: Modifier = Modifier) {
-    val animalesEspecialidades = listOf(
-        AnimalEspecialidad("Perro", "Cirugía Veterinaria"),
-        AnimalEspecialidad("Gato", "Dermatología Veterinaria"),
-        AnimalEspecialidad("Conejo", "Medicina General"),
-        AnimalEspecialidad("Hámster", "Odontología Veterinaria")
-    )
-
-    Column(modifier = modifier) {
-        animalesEspecialidades.forEach { item ->
-            AnimalButton(item)
-        }
-    }
-}
-
-@Composable
-fun AnimalButton(item: AnimalEspecialidad) {
-    Button(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        onClick = { /* Acción que se realice cuando se haga clic */ }
-    ) {
-        Text(text = "${item.nombre} - ${item.especialidad}")
-    }
-}
-
-@Composable
-fun Content(modifier: Modifier = Modifier) {
-    Text(
-        text = "Elija el veterinario que le convenga",
-        modifier = modifier.padding(16.dp)
-    )
 }

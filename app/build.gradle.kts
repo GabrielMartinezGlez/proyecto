@@ -4,11 +4,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
-<<<<<<< HEAD
-    //id("com.google.dagger.hilt.android") version "2.51.1" apply true
-   // id("androidx.room") //version "2.6.0" apply false
-=======
->>>>>>> 4a2c94e902e05916090ba4cc160161fc3b2dd4ae
+    alias(libs.plugins.hilt)
+    kotlin("plugin.serialization")
 }
 android {
     namespace = "com.empresa.aplicacion"
@@ -18,7 +15,7 @@ android {
     }
     defaultConfig {
         applicationId = "com.empresa.aplicacion"
-        minSdk = 25
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -60,24 +57,23 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
-<<<<<<< HEAD
-=======
 
->>>>>>> 4a2c94e902e05916090ba4cc160161fc3b2dd4ae
     // Room
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
-<<<<<<< HEAD
-    //Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    //Coroutines
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1")
-    implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.3.1")
-=======
 
->>>>>>> 4a2c94e902e05916090ba4cc160161fc3b2dd4ae
+    // Hilt
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.android.compiler)
+    implementation(libs.androidx.hilt.navigation.compose)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+    implementation(libs.okhttp)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -85,16 +81,4 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-<<<<<<< HEAD
-
-
-    //Hilt
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    ksp("com.google.dagger:hilt-android-compiler:2.51.1")
-
-
-    
-=======
->>>>>>> 4a2c94e902e05916090ba4cc160161fc3b2dd4ae
 }
